@@ -23,13 +23,13 @@ A simple Python utility designed to clean up temporary files, system caches, and
 1. Clone the repository to your local machine:
 
     ```bash
-    git clone https://github.com/yourusername/yourrepository.git
+    git clone https://github.com/y4hymhmmd/FileCleanup
     ```
 
 2. Navigate to the project directory:
 
     ```bash
-    cd yourrepository
+    cd FileCleanup
     ```
 
 3. Ensure you have Python installed and configured correctly.
@@ -58,5 +58,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Acknowledgements
 
 - Thanks to the Python and Tkinter communities for their contributions and support.
-- Special thanks to [Script by Cloudy](https://github.com/yourusername) for the copyright design.
+- Special thanks to [Script by Cloudy](https://github.com/y4hymhmmd/) for the copyright design.
 
