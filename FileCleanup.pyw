@@ -4,58 +4,60 @@ import ctypes
 import subprocess
 import tkinter as tk
 from tkinter import ttk, messagebox
+from typing import List
 
-def is_admin():
-    return ctypes.windll.shell32.IsUserAnAdmin()
-
-def write_log(message):
+def is_admin() -> bool:
     try:
-        with open("log.txt", "a") as log_file:
+        return ctypes.windll.shell32.IsUserAnAdmin()
+    except AttributeError:
+        return False
+
+def write_log(message: str) -> None:
+    temp_dir = os.path.join(os.environ.get('SystemRoot', 'C:\\Windows'), 'Temp')
+    log_path = os.path.join(temp_dir, 'log.txt')
+    try:
+        with open(log_path, "a") as log_file:
             log_file.write(message + "\n")
     except Exception as e:
-        messagebox.showerror("Error", f"Gagal menulis log: {e}")
+        messagebox.showerror("Error", f"Error writing to log: {e}")
 
-def run_commands():
+def run_commands() -> None:
     commands = [
-        'rd /s /q "%SystemRoot%\\Temp"',
-        'rd /s /q "%LocalAppData%\\Temp"',
-        'rd /s /q "%SystemRoot%\\Prefetch"',
-        'del /s /q "%LocalAppData%\\NVIDIA\\GLCache\\*"',
-        'del /s /q "%LocalAppData%\\Low\\NVIDIA\\PerDriverVersion\\DXCache\\*"',
-        'del /s /q "%SystemRoot%\\SoftwareDistribution\\Download\\*"',
-        'del /s /q "%LocalAppData%\\Google\\Chrome\\User Data\\Default\\Cache\\*"',
-        'del /s /q "%LocalAppData%\\Mozilla\\Firefox\\Profiles\\*.default-release\\cache2\\*"',
-        'del /s /q "%LocalAppData%\\Microsoft\\Windows\\Explorer\\thumbcache_*.db"',
-        'del /s /q "%ProgramData%\\Microsoft\\Windows Defender\\Quarantine\\*"',
-        'del /q /f %localappdata%\\IconCache.db',
-        'del /q /f %localappdata%\\thumbcache_*.db',
-        'del /s /q "%SystemRoot%\\Memory.dmp"',
-        'del /s /q "%SystemRoot%\\System32\\LogFiles\\*"',
-        'del /s /q "%SystemRoot%\\Installer\\*.log"',
-        'del /s /q "%ProgramData%\\Microsoft\\Windows\\WER\\ReportArchive\\*"',
-        'del /s /q "%ProgramData%\\Microsoft\\Windows\\WER\\ReportQueue\\*"',
-        'del /s /q "%SystemRoot%\\Minidump\\*"',
-        'del /q /f %SystemRoot%\\System32\\winevt\\Logs\\*.evtx',
-        'cleanmgr /sagerun:1',
-        'wevtutil cl Application',
-        'wevtutil cl System',
-        'powercfg -h off',
-        'defrag C: /O',
+        'cmd /c rd /s /q "%SystemRoot%\\Temp"',
+        'cmd /c rd /s /q "%LocalAppData%\\Temp"',
+        'cmd /c rd /s /q "%SystemRoot%\\Prefetch"',
+        'cmd /c del /s /q "%LocalAppData%\\NVIDIA\\GLCache\\*"',
+        'cmd /c del /s /q "%LocalAppData%\\Low\\NVIDIA\\PerDriverVersion\\DXCache\\*"',
+        'cmd /c del /s /q "%SystemRoot%\\SoftwareDistribution\\Download\\*"',
+        'cmd /c del /s /q "%LocalAppData%\\Google\\Chrome\\User Data\\Default\\Cache\\*"',
+        'cmd /c del /s /q "%LocalAppData%\\Microsoft\\Windows\\Explorer\\thumbcache_*.db"',
+        "cmd /c del /q /f %localappdata%\\IconCache.db",
+        "cmd /c del /q /f %localappdata%\\thumbcache_*.db",
+        'cmd /c del /s /q "%SystemRoot%\\Memory.dmp"',
+        'cmd /c del /s /q "%SystemRoot%\\System32\\LogFiles\\*"',
+        'cmd /c del /s /q "%SystemRoot%\\Installer\\*.log"',
+        'cmd /c del /s /q "%ProgramData%\\Microsoft\\Windows\\WER\\ReportArchive\\*"',
+        'cmd /c del /s /q "%ProgramData%\\Microsoft\\Windows\\WER\\ReportQueue\\*"',
+        'cmd /c del /s /q "%SystemRoot%\\Minidump\\*"',
+        "cmd /c del /q /f %SystemRoot%\\System32\\winevt\\Logs\\*.evtx",
+        "cmd /c wevtutil cl Application",
+        "cmd /c wevtutil cl System",
+        "cmd /c defrag C: /O",
         'powershell -Command "Clear-EventLog -LogName Application, Security, System"',
-        'powershell -Command "Clear-RecycleBin -Confirm:$false"'
+        'powershell -Command "Clear-RecycleBin -Confirm:$false"',
     ]
 
     for index, command in enumerate(commands):
-        result = subprocess.run(command, shell=True, capture_output=True, text=True)
-        write_log(f"Command: {command}\nOutput: {result.stdout}\nErrors: {result.stderr}")
-        progress_var.set((index + 1) * 100 / len(commands))
-        progress_bar.update()
-        
-    root.after(500, root.destroy)
-    messagebox.showinfo("𝗙𝗶𝗹𝗲𝗖𝗹𝗲𝗮𝗻𝘂𝗽",
-        "File has been cleaned.\n"
-        "\n"
-        "© 2024 Script by Cloudy"
+        if command:
+            result = subprocess.run(command, shell=True, capture_output=True, text=True)
+            write_log(f"Command: {command}\nOutput: {result.stdout}\nErrors: {result.stderr}")
+            progress_var.set((index + 1) * 100 / len(commands))
+            progress_bar.update()
+
+    if root:
+        root.after(500, root.destroy)
+        messagebox.showinfo(
+            "File Cleanup", "The cleanup process has completed.\n" "\n" " 2024 Script by Cloudy"
         )
 
 if not is_admin():
@@ -63,12 +65,10 @@ if not is_admin():
     sys.exit()
 
 root = tk.Tk()
-root.title("𝗙𝗶𝗹𝗲𝗖𝗹𝗲𝗮𝗻𝘂𝗽")
+root.title("File Cleanup")
 root.geometry("300x50+0+0")
-
 progress_var = tk.DoubleVar()
 progress_bar = ttk.Progressbar(root, variable=progress_var, maximum=100)
-progress_bar.pack(pady=10, padx=10, fill='both', expand=True)
-
+progress_bar.pack(pady=10, padx=10, fill="both", expand=True)
 root.after(100, run_commands)
 root.mainloop()
